@@ -2,6 +2,7 @@
 
 import re
 import sys
+import semver
 from configparser import ConfigParser, SafeConfigParser
 from mapnik import Style, Map, load_map, load_map_from_string, Envelope, Coord
 
@@ -16,7 +17,7 @@ def ServiceHandlerFactory(conf, mapfactory, onlineresource, version):
         version = common.Version()
     else:
         version = common.Version(version)
-    if version >= '1.3.0':
+    if semver.compare(version.string, '1.3.0') >= 0:
         return ServiceHandler130(conf, mapfactory, onlineresource)
     else:
         return ServiceHandler111(conf, mapfactory, onlineresource)

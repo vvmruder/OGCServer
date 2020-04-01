@@ -1,6 +1,7 @@
 """Mod_python handler for Mapnik OGC WMS Server."""
 
 import sys
+import semver
 from mod_python import apache, util
 
 from ogcserver.common import Version
@@ -45,17 +46,17 @@ class ModHandler(object):
                 reqparams = lowerparams(reqparams)
                 port = apacheReq.connection.local_addr[1]
                 onlineresource = 'http://%s:%s%s?' % (apacheReq.hostname, port, apacheReq.subprocess_env['SCRIPT_NAME'])             
-                if not reqparams.has_key('request'):
+                if 'request' not in reqparams:
                     raise OGCException('Missing Request parameter.')
                 request = reqparams['request']
                 del reqparams['request']
-                if request == 'GetCapabilities' and not reqparams.has_key('service'):
+                if request == 'GetCapabilities' and 'service' not in reqparams:
                     raise OGCException('Missing service parameter.')
                 if request in ['GetMap', 'GetFeatureInfo']:
                     service = 'WMS'
                 else:
                     service = reqparams['service']
-                if reqparams.has_key('service'):
+                if 'service' in reqparams:
                     del reqparams['service']
                 try:
                     ogcserver = __import__('ogcserver.' + service)
@@ -63,7 +64,7 @@ class ModHandler(object):
                     raise OGCException('Unsupported service "%s".' % service)
                 ServiceHandlerFactory = getattr(ogcserver, service).ServiceHandlerFactory
                 servicehandler = ServiceHandlerFactory(self.conf, self.mapfactory, onlineresource, reqparams.get('version', None))
-                if reqparams.has_key('version'):
+                if 'version' in reqparams:
                     del reqparams['version']
                 if request not in list(servicehandler.SERVICE_PARAMS.keys()):
                     raise OGCException('Operation "%s" not supported.' % request, 'OperationNotSupported')
@@ -82,10 +83,10 @@ class ModHandler(object):
             return self.traceback(apacheReq,e)
 
         if self.max_age:
-            apacheReq.headers_out.add('Cache-Control', max_age)
+            apacheReq.headers_out.add('Cache-Control', self.max_age)
         apacheReq.headers_out.add('Content-Length', str(len(response.content)))
         apacheReq.send_http_header()
-        apacheReq.write(response.content.encode())
+        apacheReq.write(response.content)
         return apache.OK
 
     def traceback(self, apacheReq,E):
@@ -95,7 +96,7 @@ class ModHandler(object):
             version = Version()
         else:
             version = Version(version)
-        if version >= '1.3.0':
+        if semver.compare(version.string, '1.3.0') >= 0:
             eh = ExceptionHandler130(self.debug)
         else:
             eh = ExceptionHandler111(self.debug)
@@ -103,7 +104,7 @@ class ModHandler(object):
         apacheReq.content_type = response.content_type
         apacheReq.headers_out.add('Content-Length', str(len(response.content)))
         apacheReq.send_http_header()
-        apacheReq.write(response.content.encode())
+        apacheReq.write(response)
         return apache.OK
 
 def lowerparams(params):

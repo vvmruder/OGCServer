@@ -144,7 +144,7 @@ class BaseServiceHandler:
                             element.append(kelement)
                     else:
                         element = ElementTree.Element('%s' % item[1])
-                        element.text = to_unicode(value)
+                        element.text = value
                         servicee.append(element)
             if len(self.conf.items_with_value('contact')) > 0:
                 element = ElementTree.Element('ContactInformation')
@@ -188,7 +188,8 @@ class Response:
 
 class Version:
 
-    def __init__(self, version = "1.1.1"):
+    def __init__(self, version="1.1.1"):
+        self.string = version
         version = version.split('.')
         if len(version) != 3:
             raise OGCException('Badly formatted version number.')
@@ -228,7 +229,7 @@ class ListFactory:
 
     def __call__(self, string):
         seq = string.split(',')
-        return map(self.cast, seq)
+        return [self.cast(i) for i in seq]
 
 def ColorFactory(colorstring):
     if re.match('^0x[a-fA-F0-9]{6}$', colorstring):
@@ -367,7 +368,7 @@ class WMSBaseServiceHandler(BaseServiceHandler):
                         raise OGCException('Requested query layer "%s" is not marked queryable.' % layername, 'LayerNotQueryable')
                 else:
                     raise OGCException('Requested query layer "%s" not in the LAYERS parameter.' % layername)
-        return Response(params['info_format'], str(writer))
+        return Response(params['info_format'], '{}'.format(writer))
 
     def _buildMap(self, params):
         if str(params['crs']) not in self.allowedepsgcodes:
@@ -380,7 +381,7 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         # relax this for now to allow for a set of specific layers (meta layers even)
         # to be used without known their styles or putting the right # of commas...
 
-        #if params.has_key('styles') and len(params['styles']) != len(params['layers']):
+        #if 'styles' in params and len(params['styles']) != len(params['layers']):
         #    raise OGCException('STYLES length does not match LAYERS length.')
         m = Map(params['width'], params['height'], '+init=%s' % params['crs'])
 
@@ -389,11 +390,10 @@ class WMSBaseServiceHandler(BaseServiceHandler):
         # disable transparent on incompatible formats 
         if transparent and params.get('format', '') == 'image/jpeg':
             transparent = False
-
         if transparent:
             # transparent has highest priority
             pass
-        elif params.has_key('bgcolor'):
+        elif 'bgcolor' in params:
             # if not transparent use bgcolor in url            
             m.background = params['bgcolor']
         else:
@@ -410,7 +410,7 @@ class WMSBaseServiceHandler(BaseServiceHandler):
                 m.background = Color(255, 255, 255, 255)
 
 
-        if params.has_key('buffer_size'):
+        if 'buffer_size' in params:
             if params['buffer_size']:
                 m.buffer_size = params['buffer_size']
         else:
@@ -520,7 +520,7 @@ class BaseExceptionHandler:
         exceptions = params.get('exceptions', None)
         if self.debug:
             return self.htmlhandler(code, message)
-        if not exceptions or not self.handlers.has_key(exceptions):
+        if not exceptions or exceptions not in self.handlers:
             exceptions = self.defaulthandler
         return self.handlers[exceptions](self, code, message, params)
 
@@ -529,7 +529,7 @@ class BaseExceptionHandler:
            resp_text = '<h2>OGCServer Error:</h2><pre>%s</pre>\n<h3>Traceback:</h3><pre>%s</pre>\n' %  (message, code)
         else:
            resp_text = message
-        return Response('text/html', resp_text.encode(), status_code=404)
+        return Response('text/html', resp_text, status_code=404)
 
     def xmlhandler(self, code, message, params):
         ogcexcetree = copy.deepcopy(self.xmltemplate)
@@ -537,7 +537,7 @@ class BaseExceptionHandler:
         e.text = message
         if code:
             e.set('code', code)
-        return Response(self.xmlmimetype, ElementTree.tostring(ogcexcetree).encode(), status_code=404)
+        return Response(self.xmlmimetype, ElementTree.tostring(ogcexcetree), status_code=404)
 
     def inimagehandler(self, code, message, params):
         im = new('RGBA', (int(params['width']), int(params['height'])))
@@ -583,20 +583,13 @@ class TextFeatureInfo:
         pass#self.buffer += '\n'
 
     def addattribute(self, name, value):
-        if type(name) is str:
-            try:
-                name = to_unicode(name)
-            except:
-                # https://github.com/mapnik/mapnik/pull/1837
-                # try the default encoding just in case source is a shape
-                name = to_unicode(name.decode('latin1').encode('utf-8'))
         if not value:
             value = ''
-        value = unicode(value)
+        value = value
         self.buffer += '%s=%s\n' % (name, value)
 
     def __str__(self):
-        return self.buffer.encode('utf-8')
+        return self.buffer
 
 class XMLFeatureInfo:
 
@@ -622,18 +615,11 @@ class XMLFeatureInfo:
     def addattribute(self, name, value):
         attribute = ElementTree.Element('attribute')
         attname = ElementTree.Element('name')
-        if type(name) is str:
-            try:
-                name = to_unicode(name)
-            except:
-                # https://github.com/mapnik/mapnik/pull/1837
-                # try the default encoding just in case source is a shape
-                name = to_unicode(name.decode('latin1').encode('utf-8'))
         if not value:
             value = ''
         attname.text = name
         attvalue = ElementTree.Element('value')
-        attvalue.text = unicode(value)
+        attvalue.text = value
         attribute.append(attname)
         attribute.append(attvalue)
         self.currentfeature.append(attribute)
@@ -641,8 +627,3 @@ class XMLFeatureInfo:
     def __str__(self):
         return '<?xml version="1.0"?>\n' + ElementTree.tostring(self.rootelement, encoding='utf-8')
 
-def to_unicode(obj, encoding='utf-8'):
-    if isinstance(obj, basestring):
-        if not isinstance(obj, unicode):
-            obj = unicode(obj, encoding)
-    return obj

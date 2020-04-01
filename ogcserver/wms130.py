@@ -8,7 +8,7 @@ ElementTree.register_namespace('xlink', "http://www.w3.org/1999/xlink")
 
 from ogcserver.common import ParameterDefinition, Response, Version, ListFactory, \
                    ColorFactory, CRSFactory, CRS, WMSBaseServiceHandler, \
-                   BaseExceptionHandler, Projection, Envelope, to_unicode
+                   BaseExceptionHandler, Projection, Envelope
 from ogcserver.exceptions import OGCException, ServerConfigurationError
 
 class ServiceHandler(WMSBaseServiceHandler):
@@ -142,21 +142,21 @@ class ServiceHandler(WMSBaseServiceHandler):
 
             rootlayername = ElementTree.Element('{http://www.opengis.net/wms}Name')
             if self.conf.has_option('map', 'wms_name'):
-                rootlayername.text = to_unicode(self.conf.get('map', 'wms_name'))
+                rootlayername.text = self.conf.get('map', 'wms_name')
             else:
                 rootlayername.text = '__all__'
             rootlayerelem.append(rootlayername)
 
             rootlayertitle = ElementTree.Element('{http://www.opengis.net/wms}Title')
             if self.conf.has_option('map', 'wms_title'):
-                rootlayertitle.text = to_unicode(self.conf.get('map', 'wms_title'))
+                rootlayertitle.text = self.conf.get('map', 'wms_title')
             else:
                 rootlayertitle.text = 'OGCServer WMS Server'
             rootlayerelem.append(rootlayertitle)
 
             rootlayerabstract = ElementTree.Element('{http://www.opengis.net/wms}Abstract')
             if self.conf.has_option('map', 'wms_abstract'):
-                rootlayerabstract.text = to_unicode(self.conf.get('map', 'wms_abstract'))
+                rootlayerabstract.text = self.conf.get('map', 'wms_abstract')
             else:
                 rootlayerabstract.text = 'OGCServer WMS Server'
             rootlayerelem.append(rootlayerabstract)
@@ -184,7 +184,7 @@ class ServiceHandler(WMSBaseServiceHandler):
             for layer in self.mapfactory.ordered_layers:
                 layerproj = Projection(layer.srs)
                 layername = ElementTree.Element('{http://www.opengis.net/wms}Name')
-                layername.text = to_unicode(layer.name)
+                layername.text = layer.name
                 env = layer.envelope()
                 layerexgbb = ElementTree.Element('{http://www.opengis.net/wms}EX_GeographicBoundingBox')
                 ll = layerproj.inverse(Coord(env.minx, env.miny))
@@ -214,15 +214,15 @@ class ServiceHandler(WMSBaseServiceHandler):
                 layere.append(layername)
                 layertitle = ElementTree.Element('{http://www.opengis.net/wms}Title')
                 if hasattr(layer,'title'):
-                    layertitle.text = to_unicode(layer.title)
+                    layertitle.text = layer.title
                     if layertitle.text == '':
-                        layertitle.text = to_unicode(layer.name)
+                        layertitle.text = layer.name
                 else:
-                    layertitle.text = to_unicode(layer.name)
+                    layertitle.text = layer.name
                 layere.append(layertitle)
                 layerabstract = ElementTree.Element('{http://www.opengis.net/wms}Abstract')
                 if hasattr(layer,'abstract'):
-                    layerabstract.text = to_unicode(layer.abstract)
+                    layerabstract.text = layer.abstract
                 else:
                     layerabstract.text = 'no abstract'
                 layere.append(layerabstract)
@@ -238,14 +238,14 @@ class ServiceHandler(WMSBaseServiceHandler):
                     for extrastyle in extrastyles:
                         style = ElementTree.Element('{http://www.opengis.net/wms}Style')
                         stylename = ElementTree.Element('{http://www.opengis.net/wms}Name')
-                        stylename.text = to_unicode(extrastyle)
+                        stylename.text = extrastyle
                         styletitle = ElementTree.Element('{http://www.opengis.net/wms}Title')
-                        styletitle.text = to_unicode(extrastyle)
+                        styletitle.text = extrastyle
                         style.append(stylename)
                         style.append(styletitle)
                         if style_count > 1 and extrastyle == 'default':
                             styleabstract = ElementTree.Element('{http://www.opengis.net/wms}Abstract')
-                            styleabstract.text = to_unicode('This layer\'s default style that combines all its other named styles.')
+                            styleabstract.text = 'This layer\'s default style that combines all its other named styles.'
                             style.append(styleabstract)
                         layere.append(style)
                 rootlayerelem.append(layere)
@@ -284,7 +284,7 @@ class ServiceHandler(WMSBaseServiceHandler):
         m = WMSBaseServiceHandler._buildMap(self, params)
         # for range of epsg codes reverse axis as per 1.3.0 spec
         if params['crs'].code >= 4000 and params['crs'].code < 5000:
-            bbox = params['bbox']
+            bbox = list(params['bbox'])
             # MapInfo Pro 10 does not "know" this is the way and gets messed up
             if not 'mapinfo' in params['HTTP_USER_AGENT'].lower():
                 m.zoom_to_box(Envelope(bbox[1], bbox[0], bbox[3], bbox[2]))
