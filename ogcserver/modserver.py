@@ -78,8 +78,8 @@ class ModHandler(object):
                 response = requesthandler(ogcparams)
                 apacheReq.content_type = response.content_type
                 apacheReq.status = apache.HTTP_OK
-        except Exception, E:
-            return self.traceback(apacheReq,E)
+        except Exception as e:
+            return self.traceback(apacheReq,e)
 
         if self.max_age:
             apacheReq.headers_out.add('Cache-Control', max_age)

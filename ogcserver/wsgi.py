@@ -30,8 +30,8 @@ def do_import(module):
     Makes setuptools namespaces work
     """
     moduleobj = None
-    exec 'import %s' % module 
-    exec 'moduleobj=%s' % module
+    exec('import {}'.format(module))
+    exec('moduleobj={}'.format(module))
     return moduleobj
  
 class WSGIApp:
