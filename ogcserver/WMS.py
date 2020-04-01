@@ -117,7 +117,7 @@ Please set one of this variables to load mapnik map object.")
                     meta_lyr.wms_srs = layer_wms_srs
                     self.ordered_layers.append(meta_lyr)
                     self.meta_layers[meta_layer_name] = meta_lyr
-                    print meta_layer_name
+                    print(meta_layer_name)
 
                 if style_name not in self.aggregatestyles.keys() and style_name not in self.styles.keys():
                     self.register_style(style_name, style_obj)
