@@ -1,6 +1,6 @@
 import nose
 import os, sys
-import StringIO
+import io
 from ogcserver.configparser import SafeConfigParser
 from ogcserver.WMS import BaseWMSFactory
 from ogcserver.wms111 import ServiceHandler as ServiceHandler111
@@ -26,7 +26,7 @@ def _wms_services(mapfile):
     # test, if it occurs zero or more than one times per loadXML invocation. However,
     # this test highly depends on the warning message text.
     stderr = sys.stderr
-    errbuf = StringIO.StringIO()
+    errbuf = io.StringIO()
     sys.stderr = errbuf
 
     wms.loadXML(file_path)

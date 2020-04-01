@@ -8,7 +8,7 @@ ElementTree.register_namespace('xlink', "http://www.w3.org/1999/xlink")
 
 from ogcserver.common import ParameterDefinition, Response, Version, ListFactory, \
                    ColorFactory, CRSFactory, WMSBaseServiceHandler, CRS, \
-                   BaseExceptionHandler, Projection, to_unicode
+                   BaseExceptionHandler, Projection
 from ogcserver.exceptions import OGCException, ServerConfigurationError
 
 
@@ -135,21 +135,21 @@ class ServiceHandler(WMSBaseServiceHandler):
 
             rootlayername = ElementTree.Element('Name')
             if self.conf.has_option('map', 'wms_name'):
-                rootlayername.text = to_unicode(self.conf.get('map', 'wms_name'))
+                rootlayername.text = self.conf.get('map', 'wms_name')
             else:
                 rootlayername.text = '__all__'
             rootlayerelem.append(rootlayername)
 
             rootlayertitle = ElementTree.Element('Title')
             if self.conf.has_option('map', 'wms_title'):
-                rootlayertitle.text = to_unicode(self.conf.get('map', 'wms_title'))
+                rootlayertitle.text = self.conf.get('map', 'wms_title')
             else:
                 rootlayertitle.text = 'OGCServer WMS Server'
             rootlayerelem.append(rootlayertitle)
 
             rootlayerabstract = ElementTree.Element('Abstract')
             if self.conf.has_option('map', 'wms_abstract'):
-                rootlayerabstract.text = to_unicode(self.conf.get('map', 'wms_abstract'))
+                rootlayerabstract.text = self.conf.get('map', 'wms_abstract')
             else:
                 rootlayerabstract.text = 'OGCServer WMS Server'
             rootlayerelem.append(rootlayerabstract)
@@ -169,7 +169,7 @@ class ServiceHandler(WMSBaseServiceHandler):
             for layer in self.mapfactory.ordered_layers:
                 layerproj = Projection(layer.srs)
                 layername = ElementTree.Element('Name')
-                layername.text = to_unicode(layer.name)
+                layername.text = layer.name
                 env = layer.envelope()
                 llp = layerproj.inverse(Coord(env.minx, env.miny))
                 urp = layerproj.inverse(Coord(env.maxx, env.maxy))
@@ -191,15 +191,15 @@ class ServiceHandler(WMSBaseServiceHandler):
                 layere.append(layername)
                 layertitle = ElementTree.Element('Title')
                 if hasattr(layer,'title'):
-                    layertitle.text = to_unicode(layer.title)
+                    layertitle.text = layer.title
                     if layertitle.text == '':
-                        layertitle.text = to_unicode(layer.name)
+                        layertitle.text = layer.name
                 else:
-                    layertitle.text = to_unicode(layer.name)
+                    layertitle.text = layer.name
                 layere.append(layertitle)
                 layerabstract = ElementTree.Element('Abstract')
                 if hasattr(layer,'abstract'):
-                    layerabstract.text = to_unicode(layer.abstract)
+                    layerabstract.text = layer.abstract
                 else:
                     layerabstract.text = 'no abstract'
                 layere.append(layerabstract)
@@ -215,14 +215,14 @@ class ServiceHandler(WMSBaseServiceHandler):
                     for extrastyle in extrastyles:
                         style = ElementTree.Element('Style')
                         stylename = ElementTree.Element('Name')
-                        stylename.text = to_unicode(extrastyle)
+                        stylename.text = extrastyle
                         styletitle = ElementTree.Element('Title')
-                        styletitle.text = to_unicode(extrastyle)
+                        styletitle.text = extrastyle
                         style.append(stylename)
                         style.append(styletitle)
                         if style_count > 1 and extrastyle == 'default':
                             styleabstract = ElementTree.Element('Abstract')
-                            styleabstract.text = to_unicode('This layer\'s default style that combines all its other named styles.')
+                            styleabstract.text = 'This layer\'s default style that combines all its other named styles.'
                             style.append(styleabstract)
                         layere.append(style)
                 rootlayerelem.append(layere)

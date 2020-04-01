@@ -42,7 +42,7 @@ if HAS_SETUPTOOLS:
                               'wms_factory=ogcserver.wsgi:ogcserver_wms_factory',
                              ],
     },
-    install_requires = ['setuptools', 'PasteScript', 'WebOb', 'Pillow']
+    install_requires = ['setuptools', 'PasteScript', 'WebOb', 'Pillow', 'semver==2.9.1']
     ))
 
 setup(**options)

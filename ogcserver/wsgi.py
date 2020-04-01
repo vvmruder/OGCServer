@@ -1,19 +1,16 @@
 """WSGI application wrapper for Mapnik OGC WMS Server."""
 
-try:
-    from urlparse import parse_qs
-except ImportError:
-    from cgi import parse_qs
+import urllib
 
 import logging
 import imp
-
-from cStringIO import StringIO
+import semver
+from io import StringIO
 
 import mapnik
 
 from ogcserver.common import Version
-from ogcserver.WMS import BaseWMSFactory
+from ogcserver.WMS import BaseWMSFactory, ServiceHandlerFactory
 from ogcserver.configparser import SafeConfigParser
 from ogcserver.wms111 import ExceptionHandler as ExceptionHandler111
 from ogcserver.wms130 import ExceptionHandler as ExceptionHandler130
@@ -30,8 +27,8 @@ def do_import(module):
     Makes setuptools namespaces work
     """
     moduleobj = None
-    exec 'import %s' % module 
-    exec 'moduleobj=%s' % module
+    exec('import {}'.format(module))
+    exec('moduleobj={}'.format(module))
     return moduleobj
  
 class WSGIApp:
@@ -73,7 +70,7 @@ class WSGIApp:
     def __call__(self, environ, start_response):
         reqparams = {}
         base = True
-        for key, value in parse_qs(environ['QUERY_STRING'], True).items():
+        for key, value in urllib.parse.parse_qs(environ['QUERY_STRING'], True).items():
             reqparams[key.lower()] = value[0]
             base = False
 
@@ -82,13 +79,12 @@ class WSGIApp:
         else:
             # if there is no baseurl in the config file try to guess a valid one
             onlineresource = 'http://%s%s%s?' % (environ['HTTP_HOST'], environ['SCRIPT_NAME'], environ['PATH_INFO'])
-
         try:
-            if not reqparams.has_key('request'):
+            if 'request' not in reqparams:
                 raise OGCException('Missing request parameter.')
             request = reqparams['request']
             del reqparams['request']
-            if request == 'GetCapabilities' and not reqparams.has_key('service'):
+            if request == 'GetCapabilities' and 'service' not in reqparams:
                 raise OGCException('Missing service parameter.')
             if request in ['GetMap', 'GetFeatureInfo']:
                 service = 'WMS'
@@ -98,17 +94,12 @@ class WSGIApp:
                 except:
                     service = 'WMS'
                     request = 'GetCapabilities'
-            if reqparams.has_key('service'):
+            if 'service' in reqparams:
                 del reqparams['service']
-            try:
-                ogcserver = do_import('ogcserver')
-            except:
-                raise OGCException('Unsupported service "%s".' % service)
-            ServiceHandlerFactory = getattr(ogcserver, service).ServiceHandlerFactory
             servicehandler = ServiceHandlerFactory(self.conf, self.mapfactory, onlineresource, reqparams.get('version', None))
-            if reqparams.has_key('version'):
+            if 'version' in reqparams:
                 del reqparams['version']
-            if request not in servicehandler.SERVICE_PARAMS.keys():
+            if request not in servicehandler.SERVICE_PARAMS:
                 raise OGCException('Operation "%s" not supported.' % request, 'OperationNotSupported')
             ogcparams = servicehandler.processParameters(request, reqparams)
             try:
@@ -127,7 +118,7 @@ class WSGIApp:
                 version = Version()
             else:
                 version = Version(version)
-            if version >= '1.3.0':
+            if semver.compare(version.string, '1.3.0') >= 0:
                 eh = ExceptionHandler130(self.debug,base,self.home_html)
             else:
                 eh = ExceptionHandler111(self.debug,base,self.home_html)
@@ -240,7 +231,7 @@ def ogcserver_base_factory(base, global_config, **local_config):
         try:
             resp = req.get_response(app)
             return resp(environ, start_response)
-        except Exception, e:
+        except Exception as e:
             if not debug:
                 log.error('%r: %s', e, e)
                 log.error('%r', environ)

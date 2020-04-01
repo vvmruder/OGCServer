@@ -45,5 +45,5 @@ if __name__ == '__main__':
     host = args.bind_address or '0.0.0.0'
     port = args.bind_port or 8000
     httpd = make_server(host, port, application)
-    print "Listening at %s:%s...." % (host,port)
+    print("Listening at {}:{}....".format(host,port))
     httpd.serve_forever()

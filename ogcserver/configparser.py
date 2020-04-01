@@ -2,7 +2,7 @@
     non-existent.
 """
 
-from ConfigParser import SafeConfigParser as OrigSafeConfigParser
+from configparser import SafeConfigParser as OrigSafeConfigParser
 
 class SafeConfigParser(OrigSafeConfigParser):
     

@@ -8,6 +8,7 @@ from os import environ
 from tempfile import gettempdir
 environ['PYTHON_EGG_CACHE'] = gettempdir()
 
+import semver
 import sys
 from jon import cgi
 
@@ -54,17 +55,17 @@ class Handler(cgi.DebugHandler):
             onlineresource = 'http://%s%s?' % (req.environ['HTTP_HOST'], req.environ['SCRIPT_NAME'])
 
         try:
-            if not reqparams.has_key('request'):
+            if 'request' not in reqparams:
                 raise OGCException('Missing request parameter.')
             request = reqparams['request']
             del reqparams['request']
-            if request == 'GetCapabilities' and not reqparams.has_key('service'):
+            if request == 'GetCapabilities' and 'service' not in reqparams:
                 raise OGCException('Missing service parameter.')
             if request in ['GetMap', 'GetFeatureInfo']:
                 service = 'WMS'
             else:
                 service = reqparams['service']
-            if reqparams.has_key('service'):
+            if 'service' in reqparams:
                 del reqparams['service']
             try:
                 ogcserver = __import__('ogcserver.' + service)
@@ -72,9 +73,9 @@ class Handler(cgi.DebugHandler):
                 raise OGCException('Unsupported service "%s".' % service)
             ServiceHandlerFactory = getattr(ogcserver, service).ServiceHandlerFactory
             servicehandler = ServiceHandlerFactory(self.conf, self.mapfactory, onlineresource, reqparams.get('version', None))
-            if reqparams.has_key('version'):
+            if 'version' in reqparams:
                 del reqparams['version']
-            if request not in servicehandler.SERVICE_PARAMS.keys():
+            if request not in list(servicehandler.SERVICE_PARAMS.keys()):
                 raise OGCException('Operation "%s" not supported.' % request, 'OperationNotSupported')
             ogcparams = servicehandler.processParameters(request, reqparams)
             try:
@@ -93,7 +94,7 @@ class Handler(cgi.DebugHandler):
                 version = Version()
             else:
                 version = Version(version)
-            if version >= '1.3.0':
+            if semver.compare(version.string, '1.3.0') >= 0:
                 eh = ExceptionHandler130(self.debug,base,self.home_html)
             else:
                 eh = ExceptionHandler111(self.debug,base,self.home_html)
@@ -110,7 +111,7 @@ class Handler(cgi.DebugHandler):
             version = Version()
         else:
             version = Version(version)
-        if version >= '1.3.0':
+        if semver.compare(version.string, '1.3.0') >= 0:
             eh = ExceptionHandler130(self.debug)
         else:
             eh = ExceptionHandler111(self.debug)
