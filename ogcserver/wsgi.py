@@ -3,7 +3,7 @@
 try:
     from urlparse import parse_qs
 except ImportError:
-    from cgi import parse_qs
+    from cgi import parse as parse_qs
 
 import logging
 import imp
