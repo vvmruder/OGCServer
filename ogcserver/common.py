@@ -529,7 +529,7 @@ class BaseExceptionHandler:
            resp_text = '<h2>OGCServer Error:</h2><pre>%s</pre>\n<h3>Traceback:</h3><pre>%s</pre>\n' %  (message, code)
         else:
            resp_text = message
-        return Response('text/html', resp_text, status_code=404)
+        return Response('text/html', resp_text.encode(), status_code=404)
 
     def xmlhandler(self, code, message, params):
         ogcexcetree = copy.deepcopy(self.xmltemplate)
@@ -537,7 +537,7 @@ class BaseExceptionHandler:
         e.text = message
         if code:
             e.set('code', code)
-        return Response(self.xmlmimetype, ElementTree.tostring(ogcexcetree), status_code=404)
+        return Response(self.xmlmimetype, ElementTree.tostring(ogcexcetree).encode(), status_code=404)
 
     def inimagehandler(self, code, message, params):
         im = new('RGBA', (int(params['width']), int(params['height'])))
