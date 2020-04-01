@@ -240,7 +240,7 @@ def ogcserver_base_factory(base, global_config, **local_config):
         try:
             resp = req.get_response(app)
             return resp(environ, start_response)
-        except Exception, e:
+        except Exception as e:
             if not debug:
                 log.error('%r: %s', e, e)
                 log.error('%r', environ)
