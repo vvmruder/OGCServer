@@ -101,7 +101,7 @@ class Handler(cgi.DebugHandler):
 
         req.set_header('Content-Type', response.content_type)
         req.set_header('Content-Length', str(len(response.content)))
-        req.write(response.content.encode())
+        req.write(response.content)
 
     def traceback(self, req):
         reqparams = lowerparams(req.params)
@@ -117,10 +117,10 @@ class Handler(cgi.DebugHandler):
         response = eh.getresponse(reqparams)
         req.set_header('Content-Type', response.content_type)
         req.set_header('Content-Length', str(len(response.content)))
-        req.write(response.content.encode())
+        req.write(response.content)
 
 def lowerparams(params):
     reqparams = {}
-    for key in params.keys():
-        reqparams[key.lower()] = params[key]
+    for key, value in params.items():
+        reqparams[key.lower()] = value
     return reqparams
