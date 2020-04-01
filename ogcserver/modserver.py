@@ -85,7 +85,7 @@ class ModHandler(object):
             apacheReq.headers_out.add('Cache-Control', max_age)
         apacheReq.headers_out.add('Content-Length', str(len(response.content)))
         apacheReq.send_http_header()
-        apacheReq.write(response.content)
+        apacheReq.write(response.content.encode())
         return apache.OK
 
     def traceback(self, apacheReq,E):
@@ -103,7 +103,7 @@ class ModHandler(object):
         apacheReq.content_type = response.content_type
         apacheReq.headers_out.add('Content-Length', str(len(response.content)))
         apacheReq.send_http_header()
-        apacheReq.write(response.content)
+        apacheReq.write(response.content.encode())
         return apache.OK
 
 def lowerparams(params):
