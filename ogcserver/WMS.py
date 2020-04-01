@@ -2,7 +2,7 @@
 
 import re
 import sys
-import ConfigParser
+from configparser import ConfigParser
 from mapnik import Style, Map, load_map, load_map_from_string, Envelope, Coord
 
 from ogcserver import common
