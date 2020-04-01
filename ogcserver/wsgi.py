@@ -75,7 +75,7 @@ class WSGIApp:
         base = True
         query = parse_qs(environ['QUERY_STRING'])
         for key in query.keys():
-            reqparams[key.lower()] = query[key][0]
+            reqparams[key.lower()] = query[key]value[0]
             base = False
 
         if self.conf.has_option_with_value('service', 'baseurl'):
@@ -128,7 +128,7 @@ class WSGIApp:
                 version = Version()
             else:
                 version = Version(version)
-            if version >= '1.3.0':
+            if version == '1.3.0':
                 eh = ExceptionHandler130(self.debug,base,self.home_html)
             else:
                 eh = ExceptionHandler111(self.debug,base,self.home_html)

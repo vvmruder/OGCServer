@@ -121,6 +121,6 @@ class Handler(cgi.DebugHandler):
 
 def lowerparams(params):
     reqparams = {}
-    for key, value in params.items():
-        reqparams[key.lower()] = value
+    for key in params.keys():
+        reqparams[key.lower()] = params[key]
     return reqparams
