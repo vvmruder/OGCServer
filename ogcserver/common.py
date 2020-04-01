@@ -96,9 +96,9 @@ class BaseServiceHandler:
     def processParameters(self, requestname, params):
         finalparams = {}
         for paramname, paramdef in self.SERVICE_PARAMS[requestname].items():
-            if paramname not in params.keys() and paramdef.mandatory:
+            if paramname not in list(params.keys()) and paramdef.mandatory:
                 raise OGCException('Mandatory parameter "%s" missing from request.' % paramname)
-            elif paramname in params.keys():
+            elif paramname in list(params.keys()):
                 try:
                     params[paramname] = paramdef.cast(params[paramname])
                 except OGCException:
@@ -440,13 +440,13 @@ class WMSBaseServiceHandler(BaseServiceHandler):
                 if hasattr(layer,'meta_style'):
                     continue
                 reqstyle = layer.wmsdefaultstyle
-                if reqstyle in self.mapfactory.aggregatestyles.keys():
+                if reqstyle in list(self.mapfactory.aggregatestyles.keys()):
                     for stylename in self.mapfactory.aggregatestyles[reqstyle]:
                         layer.styles.append(stylename)
                 else:
                     layer.styles.append(reqstyle)
                 for stylename in layer.styles:
-                    if stylename in self.mapfactory.styles.keys():
+                    if stylename in list(self.mapfactory.styles.keys()):
                         m.append_style(stylename, self.mapfactory.styles[stylename])
                 m.layers.append(layer)
         else:
@@ -473,14 +473,14 @@ class WMSBaseServiceHandler(BaseServiceHandler):
                         raise OGCException('Invalid style "%s" requested for layer "%s".' % (reqstyle, layername), 'StyleNotDefined')
                     if not reqstyle:
                         reqstyle = layer.wmsdefaultstyle
-                    if reqstyle in self.mapfactory.aggregatestyles.keys():
+                    if reqstyle in list(self.mapfactory.aggregatestyles.keys()):
                         for stylename in self.mapfactory.aggregatestyles[reqstyle]:
                             layer.styles.append(stylename)
                     else:
                         layer.styles.append(reqstyle)
 
                     for stylename in layer.styles:
-                        if stylename in self.mapfactory.styles.keys():
+                        if stylename in list(self.mapfactory.styles.keys()):
                             m.append_style(stylename, self.mapfactory.styles[stylename])
                         else:
                             raise ServerConfigurationError('Layer "%s" refers to non-existent style "%s".' % (layername, stylename))

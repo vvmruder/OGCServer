@@ -74,7 +74,7 @@ class Handler(cgi.DebugHandler):
             servicehandler = ServiceHandlerFactory(self.conf, self.mapfactory, onlineresource, reqparams.get('version', None))
             if reqparams.has_key('version'):
                 del reqparams['version']
-            if request not in servicehandler.SERVICE_PARAMS.keys():
+            if request not in list(servicehandler.SERVICE_PARAMS.keys()):
                 raise OGCException('Operation "%s" not supported.' % request, 'OperationNotSupported')
             ogcparams = servicehandler.processParameters(request, reqparams)
             try:
