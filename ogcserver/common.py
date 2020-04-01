@@ -4,7 +4,7 @@ import re
 import sys
 import copy
 from sys import exc_info
-from StringIO import StringIO
+from io import StringIO
 from xml.etree import ElementTree
 from traceback import format_exception, format_exception_only
 
