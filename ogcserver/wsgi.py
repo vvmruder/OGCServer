@@ -8,7 +8,7 @@ except ImportError:
 import logging
 import imp
 
-from cStringIO import StringIO
+from io import StringIO
 
 import mapnik
 
