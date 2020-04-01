@@ -73,8 +73,9 @@ class WSGIApp:
     def __call__(self, environ, start_response):
         reqparams = {}
         base = True
-        for key, value in parse_qs(environ['QUERY_STRING'], True).items():
-            reqparams[key.lower()] = value[0]
+        query = parse_qs(environ['QUERY_STRING'])
+        for key in query.keys():
+            reqparams[key.lower()] = query[key][0]
             base = False
 
         if self.conf.has_option_with_value('service', 'baseurl'):
