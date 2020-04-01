@@ -1,0 +1,17 @@
+<Map background-color="steelblue" srs="+init=epsg:2056">
+
+  <Style name="My Style">
+    <Rule>
+      <PolygonSymbolizer fill="#f2eff9" />
+      <LineSymbolizer stroke="rgb(50%,50%,50%)" stroke-width="0.1" />
+    </Rule>
+  </Style>
+
+  <Layer name="oberwil" srs="+init=epsg:2056" queryable="true">
+    <StyleName>My Style</StyleName>
+    <Datasource>
+      <Parameter name="type">shape</Parameter>
+      <Parameter name="file">test.shp</Parameter>
+    </Datasource>
+  </Layer>
+</Map>
