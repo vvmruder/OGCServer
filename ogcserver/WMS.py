@@ -2,7 +2,7 @@
 
 import re
 import sys
-from configparser import ConfigParser
+from configparser import ConfigParser, SafeConfigParser
 from mapnik import Style, Map, load_map, load_map_from_string, Envelope, Coord
 
 from ogcserver import common
@@ -53,7 +53,7 @@ class BaseWMSFactory:
         self.latlonbb = None
 
     def loadXML(self, xmlfile=None, strict=False, xmlstring='', basepath=''):
-        config = ConfigParser.SafeConfigParser()
+        config = SafeConfigParser()
         map_wms_srs = None
         if self.configpath:
             config.readfp(open(self.configpath))
