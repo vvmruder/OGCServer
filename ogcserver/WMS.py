@@ -143,7 +143,7 @@ Please set one of this variables to load mapnik map object.")
                         self.meta_styles[meta_layer_name] = meta_s
                         meta_lyr = common.copy_layer(lyr)
                         meta_lyr.meta_style = meta_layer_name
-                        print meta_layer_name
+                        print(meta_layer_name)
                         meta_lyr.name = meta_layer_name
                         meta_lyr.wmsextrastyles = ()
                         meta_lyr.defaultstyle = meta_layer_name
